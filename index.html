@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThinkSmart GPT</title>
+    <title>Prism: The Cognitive Partner</title>
     <!-- Markdown Parser for pretty text -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root {
-            --bg-color: #1e1e2e;
-            --sidebar-color: #181825;
-            --accent-color: #89b4fa;
-            --text-color: #cdd6f4;
-            --user-msg-bg: #313244;
-            --ai-msg-bg: #181825;
-            --border-color: #45475a;
+            --bg-color: #0f172a; /* Darker slate */
+            --sidebar-color: #1e293b;
+            --accent-color: #38bdf8; /* Light Blue */
+            --text-color: #f1f5f9;
+            --user-msg-bg: #334155;
+            --ai-msg-bg: #1e293b;
+            --border-color: #475569;
+            --btn-hover: #0ea5e9;
         }
 
         body {
@@ -35,21 +36,27 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        h1 { margin: 0; font-size: 1.2rem; color: var(--accent-color); display: flex; align-items: center; gap: 10px; }
-        
-        /* API Key Input Area */
-        .api-container {
-            display: flex;
-            gap: 10px;
+        h1 { 
+            margin: 0; 
+            font-size: 1.4rem; 
+            color: var(--accent-color); 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            letter-spacing: 0.5px;
         }
-        input[type="password"] {
-            background: var(--bg-color);
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
+
+        .badge {
+            font-size: 0.7rem;
+            background: var(--border-color);
+            color: #94a3b8;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: normal;
+            margin-left: 10px;
         }
 
         /* Chat Container */
@@ -64,27 +71,34 @@
             margin: 0 auto;
             width: 100%;
             box-sizing: border-box;
+            scroll-behavior: smooth;
         }
 
         .message {
             padding: 1.5rem;
-            border-radius: 8px;
-            line-height: 1.6;
+            border-radius: 12px;
+            line-height: 1.7;
             animation: fadeIn 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .message.user {
             background-color: var(--user-msg-bg);
             border-left: 4px solid var(--accent-color);
+            margin-left: 2rem;
         }
 
         .message.ai {
             background-color: var(--ai-msg-bg);
             border: 1px solid var(--border-color);
+            margin-right: 2rem;
         }
 
-        /* Specific Styling for the 3 Steps */
-        strong { color: var(--accent-color); }
+        /* Markdown Styling */
+        .message h3 { margin-top: 0; color: var(--accent-color); font-size: 1.1rem;}
+        .message ul { padding-left: 20px; }
+        .message li { margin-bottom: 5px; }
+        .message strong { color: var(--accent-color); }
         
         /* Input Area */
         #input-area {
@@ -100,6 +114,7 @@
             max-width: 900px;
             display: flex;
             gap: 10px;
+            position: relative;
         }
 
         textarea {
@@ -108,65 +123,79 @@
             border: 1px solid var(--border-color);
             color: white;
             border-radius: 8px;
-            padding: 12px;
+            padding: 15px;
             resize: none;
             font-family: inherit;
-            height: 50px;
+            height: 55px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
         }
 
-        textarea:focus { outline: 2px solid var(--accent-color); }
+        textarea:focus { outline: none; border-color: var(--accent-color); }
 
         button {
             background-color: var(--accent-color);
             color: var(--bg-color);
             border: none;
-            padding: 0 20px;
+            padding: 0 25px;
             border-radius: 8px;
             font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: background-color 0.2s;
         }
 
-        button:hover { opacity: 0.9; }
-        button:disabled { background-color: #45475a; cursor: not-allowed; }
+        button:hover { background-color: var(--btn-hover); }
+        button:disabled { background-color: var(--border-color); cursor: wait; color: #94a3b8; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Loading Indicator */
-        .typing-indicator { font-style: italic; color: #6c7086; display: none; margin-bottom: 20px;}
+        .typing-indicator { 
+            font-style: italic; 
+            color: #94a3b8; 
+            text-align: center; 
+            font-size: 0.9rem; 
+            margin-bottom: 10px; 
+            opacity: 0; 
+            transition: opacity 0.2s;
+        }
+        .typing-indicator.active { opacity: 1; }
+
     </style>
 </head>
 <body>
 
 <header>
-    <h1>🧠 ThinkSmart GPT</h1>
-    <div class="api-container">
-        <input type="password" id="apiKey" placeholder="Paste OpenAI API Key here">
-    </div>
+    <h1>
+        🧠 Prism 
+        <span class="badge">Free Edition</span>
+    </h1>
 </header>
 
 <div id="chat-container">
     <div class="message ai">
-        <strong>ThinkSmart GPT:</strong><br>
-        Hello. I am here to augment your thinking, not just answer questions. <br><br>
-        I will use the Socratic method to help you clarify your goals, check your logic for biases, and suggest alternative mental models. <br><br>
-        What problem or thought process would you like to examine today?
+        <strong>Prism AI:</strong><br>
+        Hello. I am your cognitive partner. <br><br>
+        I do not simply answer questions. I use a 3-step framework (Clarify, Verify, Diverge) to help you think deeper, spot biases, and find better solutions.<br><br>
+        What complex problem are you wrestling with right now?
     </div>
 </div>
 
-<div class="typing-indicator" id="loading">ThinkSmart is analyzing your logic...</div>
+<div class="typing-indicator" id="loading">Prism is analyzing your logic...</div>
 
 <div id="input-area">
     <div class="input-wrapper">
-        <textarea id="userInput" placeholder="Describe your situation or problem..."></textarea>
+        <textarea id="userInput" placeholder="Describe your situation (e.g., 'I need to fire my sales lead because revenue is down')..." spellcheck="false"></textarea>
         <button id="sendBtn" onclick="sendMessage()">Analyze</button>
     </div>
 </div>
 
 <script>
-    // THE CORE BRAIN: The System Persona
+    // --- CONFIGURATION ---
+    // The Persona Definition
     const SYSTEM_PROMPT = `
-You are ThinkSmart GPT, a cognitive partner designed to augment human intelligence.
+You are Prism (formerly ThinkSmart), a cognitive partner designed to augment human intelligence.
 Your Goal: Do not simply provide answers. Enhance the user's thinking process.
 Persona: Friendly, non-judgmental, concise Socratic guide. Prioritize clarity, logic, and depth.
 
@@ -196,18 +225,18 @@ Regardless of input, you MUST format your response exactly like this:
 TONE: Concise. Empowering. No fluff.
 `;
 
+    // --- STATE MANAGEMENT ---
     const chatContainer = document.getElementById('chat-container');
     const userInput = document.getElementById('userInput');
-    const apiKeyInput = document.getElementById('apiKey');
     const sendBtn = document.getElementById('sendBtn');
     const loadingDiv = document.getElementById('loading');
 
-    // Store conversation history
+    // We store history as a simple array of objects to reconstruct the conversation text
     let conversationHistory = [
-        { role: "system", content: SYSTEM_PROMPT }
+        { role: "System", content: SYSTEM_PROMPT }
     ];
 
-    // Handle Enter key to send
+    // --- EVENT LISTENERS ---
     userInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -215,68 +244,62 @@ TONE: Concise. Empowering. No fluff.
         }
     });
 
+    // --- CORE LOGIC ---
     async function sendMessage() {
         const text = userInput.value.trim();
-        const apiKey = apiKeyInput.value.trim();
-
         if (!text) return;
-        if (!apiKey) {
-            alert("Please enter your OpenAI API Key in the top right corner.");
-            return;
-        }
 
         // 1. Add User Message to UI
         appendMessage('user', text);
         userInput.value = '';
         
-        // 2. Update History
-        conversationHistory.push({ role: "user", content: text });
+        // 2. Update Internal History
+        conversationHistory.push({ role: "User", content: text });
 
-        // 3. Show Loading
-        loadingDiv.style.display = 'block';
+        // 3. Show Loading State
+        loadingDiv.className = 'typing-indicator active';
         sendBtn.disabled = true;
         chatContainer.scrollTop = chatContainer.scrollHeight;
 
+        // 4. Construct the Prompt for the Free API
+        // We combine the history into a single text block because simple free endpoints handle this better
+        const fullPrompt = conversationHistory
+            .map(msg => `## ${msg.role}:\n${msg.content}`)
+            .join("\n\n") + "\n\n## Assistant (Prism):";
+
         try {
-            // 4. Call OpenAI API
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`
-                },
-                body: JSON.stringify({
-                    model: "gpt-4o", // Or gpt-3.5-turbo if preferred
-                    messages: conversationHistory,
-                    temperature: 0.7
-                })
+            // 5. Call Pollinations.ai (Free, No Key Required)
+            // We use a random seed to ensure we don't get cached responses
+            const randomSeed = Math.floor(Math.random() * 1000000);
+            const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}?model=openai&seed=${randomSeed}`, {
+                method: 'GET' 
             });
 
-            const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message);
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
             }
 
-            const aiContent = data.choices[0].message.content;
+            const aiContent = await response.text();
 
-            // 5. Add AI Response to UI
+            // 6. Add AI Response to UI
             appendMessage('ai', aiContent);
-            conversationHistory.push({ role: "assistant", content: aiContent });
+            conversationHistory.push({ role: "Assistant", content: aiContent });
 
         } catch (error) {
-            appendMessage('ai', `**Error:** ${error.message}`);
+            console.error(error);
+            appendMessage('ai', `**Connection Error:** I could not reach the cognitive engine. Please check your internet or try again in a moment.`);
         } finally {
-            loadingDiv.style.display = 'none';
+            loadingDiv.className = 'typing-indicator';
             sendBtn.disabled = false;
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
     }
 
+    // --- UI HELPER ---
     function appendMessage(role, text) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${role}`;
-        // Parse Markdown content
+        // Parse Markdown content using the marked.js library
         msgDiv.innerHTML = marked.parse(text);
         chatContainer.appendChild(msgDiv);
     }
